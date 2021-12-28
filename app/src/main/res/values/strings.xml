@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">MIDIMapper</string>
+    <string name="switch_preset">Switch preset</string>
+    <string name="rename_preset">Rename preset</string>
+    <string name="switch_device">Switch device</string>
+    <string name="press_key">Press desired key on MIDI controller</string>
+    <string name="device_not_detected">No MIDI controller device detected</string>
+    <string name="device_connection_failure">Failed to connect device</string>
+    <string name="feature_not_supported">Your device does not support MIDI controllers</string>
+    <string name="layout_hidden_message">You can restore menu widget in the service\'s settings app.</string>
+    <string name="error">Error</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="header">%1$s (%2$s)</string>
+    <string name="configuration_menu">Configuration menu</string>
+    <string name="add_key_binding">Add key note binding</string>
+    <string name="settings_activity">Settings App</string>
+    <string name="hide_configuration_menu">Hide configuration menu</string>
+    <string name="remove_key_binding">Remove key note binding</string>
+    <string name="key_binding_item">%1$s%2$s (%3$f, %4$f)</string>
+    <string name="enable_service">Enable accessibility service</string>
+    <string name="menu_widget_visible">Menu widget visible</string>
+    <string name="devices">Devices</string>
+    <string name="expand">Expand</string>
+    <string name="name">Name</string>
+    <string name="preset">Preset</string>
+</resources>

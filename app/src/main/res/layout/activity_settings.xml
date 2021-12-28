@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    tools:context="com.softsquare.midimapper.gui.SettingsActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:fillViewport="true"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:onClick="openAccessibilitySettings"
+                android:paddingTop="@dimen/settings_padding_vertical"
+                android:paddingBottom="@dimen/settings_padding_vertical"
+                android:paddingStart="@dimen/settings_padding_horizontal"
+                android:paddingEnd="@dimen/settings_padding_horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center"
+                    android:textSize="@dimen/settings_font_size"
+                    android:text="@string/enable_service" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center"
+                    android:contentDescription="@string/enable_service"
+                    android:src="@drawable/ic_baseline_launch_24" />
+
+            </FrameLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#FFF" />
+
+            <LinearLayout
+                android:id="@+id/settings_views_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingTop="@dimen/settings_padding_vertical"
+                    android:paddingBottom="@dimen/settings_padding_vertical"
+                    android:paddingStart="@dimen/settings_padding_horizontal"
+                    android:paddingEnd="@dimen/settings_padding_horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start|center"
+                        android:textSize="@dimen/settings_font_size"
+                        android:text="@string/menu_widget_visible" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/menu_visibility_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center" />
+
+                </FrameLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#FFF" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="@dimen/settings_padding_horizontal"
+                    android:paddingTop="@dimen/settings_padding_vertical"
+                    android:paddingEnd="@dimen/settings_padding_horizontal"
+                    android:paddingBottom="@dimen/settings_padding_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start|center"
+                        android:text="@string/devices"
+                        android:textSize="@dimen/settings_font_size" />
+
+                    <ImageButton
+                        android:id="@+id/devices_expand_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center"
+                        android:onClick="expandPanel"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/expand"
+                        android:src="@drawable/ic_baseline_arrow_drop_down_24" />
+
+                </FrameLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#FFF" />
+
+                <LinearLayout
+                    android:id="@+id/devices_expandable_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/devices_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

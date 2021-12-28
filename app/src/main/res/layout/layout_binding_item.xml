@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="binding"
+            type="com.softsquare.midimapper.model.KeyBinding" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/settings_padding_vertical"
+        android:paddingBottom="@dimen/settings_padding_vertical"
+        android:paddingLeft="@dimen/settings_padding_horizontal"
+        android:paddingRight="@dimen/settings_padding_horizontal"
+        android:background="@{binding.color, default=@color/red}">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center"
+            android:text="@{@string/key_binding_item(binding.label, binding.octave, binding.x, binding.y), default=Binding}"
+            android:textSize="@dimen/settings_font_size"
+            android:textColor="@android:color/black"/>
+
+    </FrameLayout>
+
+</layout>

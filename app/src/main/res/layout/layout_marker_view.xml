@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="binding"
+            type="com.softsquare.midimapper.model.KeyBinding" />
+    </data>
+
+    <FrameLayout
+        android:id="@+id/marker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/marker_ripple"
+            android:layout_width="@dimen/marker_icon_size"
+            android:layout_height="@dimen/marker_icon_size"
+            android:layout_gravity="center"
+            android:scaleX="0"
+            android:scaleY="0"
+            android:alpha="0.5"
+            android:src="@drawable/ic_circle"
+            app:tint='@{binding.getColor, default="#fc9392"}' />
+
+        <ImageView
+            android:layout_width="@dimen/marker_icon_size"
+            android:layout_height="@dimen/marker_icon_size"
+            android:src="@drawable/ic_baseline_add_24"
+            app:tint='@{binding.getColor, default="#fc9392"}' />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/marker_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor='@{binding.color, default="#fc9392"}'
+                android:textSize="@dimen/marker_font_size"
+                android:text='@{binding.label, default="C#"}' />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor='@{binding.color, default="#fc9392"}'
+                android:textSize="@dimen/marker_index_size"
+                android:text="@{binding.octave, default=1}" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</layout>

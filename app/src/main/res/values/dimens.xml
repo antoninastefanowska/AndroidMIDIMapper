@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="marker_icon_size">75dp</dimen>
+    <dimen name="marker_font_size">20sp</dimen>
+    <dimen name="marker_index_size">10sp</dimen>
+    <dimen name="device_name_size">50sp</dimen>
+    <dimen name="message_size">30sp</dimen>
+    <dimen name="preset_name_size">30sp</dimen>
+    <dimen name="trash_bin_margin">15dp</dimen>
+    <dimen name="settings_font_size">20sp</dimen>
+    <dimen name="settings_padding_vertical">10dp</dimen>
+    <dimen name="settings_padding_horizontal">25dp</dimen>
+    <dimen name="menu_widget_radius">70dp</dimen>
+    <dimen name="menu_widget_size">145dp</dimen>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:custom="http://schemas.android.com/tools"
+    android:theme="@style/Theme.AppCompat"
+    android:id="@+id/main_menu_layout"
+    android:layout_width="@dimen/menu_widget_size"
+    android:layout_height="@dimen/menu_widget_size"
+    android:layout_gravity="bottom|start">
+
+    <com.sa90.materialarcmenu.ArcMenu
+        android:id="@+id/menu_widget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:tooltipText="@string/configuration_menu"
+        app:menu_color="@color/light_blue"
+        app:menu_open="arc_right"
+        app:menu_radius="@dimen/menu_widget_radius"
+        app:menu_scr="@drawable/ic_baseline_settings_24">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/menu_button_hide_widget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_visibility_off_24"
+            android:tooltipText="@string/hide_configuration_menu"
+            app:backgroundTint="@color/blue" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/menu_button_open_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_build_24"
+            android:tooltipText="@string/settings_activity"
+            app:backgroundTint="@color/green" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/menu_button_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_add_24"
+            android:tooltipText="@string/add_key_binding"
+            app:backgroundTint="@color/red" />
+
+    </com.sa90.materialarcmenu.ArcMenu>
+
+</FrameLayout>

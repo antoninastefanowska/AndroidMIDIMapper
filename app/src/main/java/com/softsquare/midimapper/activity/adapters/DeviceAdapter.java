@@ -1,4 +1,4 @@
-package com.softsquare.midimapper.gui;
+package com.softsquare.midimapper.activity.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,20 +13,22 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.softsquare.midimapper.MIDIMapperAccessibilityService;
+import com.softsquare.midimapper.activity.ViewUtilities;
+import com.softsquare.midimapper.communication.AppActionPerformer;
 import com.softsquare.midimapper.R;
-import com.softsquare.midimapper.Utilities;
+import com.softsquare.midimapper.model.AppState;
+import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.databinding.LayoutDeviceItemBinding;
-import com.softsquare.midimapper.model.BindingsPreset;
-import com.softsquare.midimapper.model.MIDIControllerDevice;
-import com.softsquare.midimapper.model.Settings;
+import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder> {
-    private final Settings settings;
-    private final List<MIDIControllerDevice> devices;
+    private final AppState appState;
+    private final List<Device> devices;
+    private final RecyclerView recyclerView;
+    private final AppActionPerformer actionPerformer;
 
     public static class DeviceViewHolder extends RecyclerView.ViewHolder {
         public LayoutDeviceItemBinding binding;
@@ -35,13 +37,14 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         public ImageButton createPresetButton;
         public RadioButton selectDeviceRadioButton;
 
-        public DeviceViewHolder(@NonNull View itemView, LayoutDeviceItemBinding binding, Settings settings) {
+        public DeviceViewHolder(@NonNull View itemView, LayoutDeviceItemBinding binding, PresetAdapter presetAdapter) {
             super(itemView);
             this.binding = binding;
-            presetAdapter = new PresetAdapter(settings);
+            this.presetAdapter = presetAdapter;
             setIsRecyclable(true);
 
             RecyclerView presetsRecyclerView = itemView.findViewById(R.id.presets_recycler_view);
+            presetAdapter.setRecyclerView(presetsRecyclerView);
             presetsRecyclerView.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             presetsRecyclerView.setAdapter(presetAdapter);
 
@@ -63,9 +66,17 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         }
     }
 
-    public DeviceAdapter(Settings settings) {
-        this.settings = settings;
-        devices = new ArrayList<>(settings.getDevices().values());
+    public DeviceAdapter(AppState appState, AppActionPerformer actionPerformer, RecyclerView recyclerView) {
+        this.appState = appState;
+        this.actionPerformer = actionPerformer;
+        this.recyclerView = recyclerView;
+        devices = new ArrayList<>(appState.getDevices().values());
+    }
+
+    public PresetAdapter findPresetAdapter(Device device) {
+        int position = devices.indexOf(device);
+        DeviceViewHolder viewHolder = (DeviceViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+        return viewHolder != null ? viewHolder.presetAdapter : null;
     }
 
     @NonNull
@@ -75,20 +86,21 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         LayoutInflater inflater = LayoutInflater.from(context);
         LayoutDeviceItemBinding binding = LayoutDeviceItemBinding.inflate(inflater, parent, false);
         View itemView = binding.getRoot();
-        Utilities.setEnabledForGroup(Utilities.isServiceEnabled(context), (ViewGroup)itemView);
-        return new DeviceViewHolder(itemView, binding, settings);
+        ViewUtilities.setEnabledForGroup(MIDIMapperAccessibilityService.isServiceEnabled(context), (ViewGroup)itemView);
+        PresetAdapter presetAdapter = new PresetAdapter(appState, actionPerformer);
+        return new DeviceViewHolder(itemView, binding, presetAdapter);
     }
 
     @Override
     public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
-        MIDIControllerDevice device = devices.get(position);
+        Device device = devices.get(position);
         holder.binding.setDevice(device);
         holder.binding.executePendingBindings();
         holder.presetAdapter.setDevice(device);
-        holder.removeButton.setOnClickListener((View view) -> remove(position));
-        holder.createPresetButton.setOnClickListener((View view) -> createPreset(holder, device));
+        holder.removeButton.setOnClickListener((View view) -> onRemove(device));
+        holder.createPresetButton.setOnClickListener((View view) -> onCreatePreset(device));
 
-        holder.selectDeviceRadioButton.setChecked(device.getSerialNumber().equals(settings.getCurrentDeviceSerialNumber()));
+        holder.selectDeviceRadioButton.setChecked(device.getSerialNumber().equals(appState.getCurrentDeviceSerialNumber()));
         holder.selectDeviceRadioButton.setEnabled(device.isConnected());
         holder.selectDeviceRadioButton.setOnCheckedChangeListener((buttonView, isChecked) -> setSelected(device, isChecked));
     }
@@ -98,36 +110,33 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         return devices.size();
     }
 
-    private void setSelected(MIDIControllerDevice device, boolean checked) {
-        if (checked) {
-            int prevPosition = devices.indexOf(settings.getCurrentDevice());
-            settings.setCurrentDeviceSerialNumber(device.getSerialNumber());
-            notifyItemChanged(prevPosition);
-            updateConfigurationView();
-        }
+    public void addItem(Device device) {
+        devices.add(device);
+        notifyItemInserted(devices.size() - 1);
     }
 
-    public void deviceConnectionChanged(MIDIControllerDevice device) {
+    public void updateItem(Device device) {
         int position = devices.indexOf(device);
         notifyItemChanged(position);
     }
 
-    private void createPreset(DeviceViewHolder holder, MIDIControllerDevice device) {
-        BindingsPreset preset = device.createNewPreset();
-        holder.presetAdapter.add(preset);
-    }
-
-    private void remove(int position) {
-        MIDIControllerDevice device = devices.remove(position);
-        settings.removeDevice(device.getSerialNumber());
+    public void removeItem(Device device) {
+        int position = devices.indexOf(device);
         notifyItemRemoved(position);
-        if (settings.getCurrentDeviceSerialNumber() == null)
-            updateConfigurationView();
     }
 
-    private void updateConfigurationView() {
-        MIDIMapperAccessibilityService service = MIDIMapperAccessibilityService.getInstance();
-        if (service != null)
-            service.updateConfigurationView();
+    private void setSelected(Device device, boolean checked) {
+        if (checked) {
+            Device oldDevice = appState.getCurrentDevice();
+            actionPerformer.changeCurrentDevice(oldDevice, device);
+        }
+    }
+
+    private void onCreatePreset(Device device) {
+        actionPerformer.createPreset(device);
+    }
+
+    private void onRemove(Device device) {
+        actionPerformer.removeDevice(device);
     }
 }

@@ -1,4 +1,4 @@
-package com.softsquare.midimapper.gui;
+package com.softsquare.midimapper.activity.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,21 +18,24 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.softsquare.midimapper.MIDIMapperAccessibilityService;
+import com.softsquare.midimapper.communication.AppActionPerformer;
+import com.softsquare.midimapper.model.AppState;
+import com.softsquare.midimapper.model.Device;
+import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 import com.softsquare.midimapper.R;
-import com.softsquare.midimapper.Utilities;
+import com.softsquare.midimapper.activity.ViewUtilities;
 import com.softsquare.midimapper.databinding.LayoutPresetItemBinding;
 import com.softsquare.midimapper.model.BindingsPreset;
-import com.softsquare.midimapper.model.MIDIControllerDevice;
-import com.softsquare.midimapper.model.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetViewHolder> {
-    private MIDIControllerDevice device;
+    private Device device;
     private List<BindingsPreset> presets = new ArrayList<>();
-    private Settings settings;
+    private AppState appState;
+    private AppActionPerformer actionPerformer;
+    private RecyclerView recyclerView;
 
     public static class PresetViewHolder extends RecyclerView.ViewHolder {
         public LayoutPresetItemBinding binding;
@@ -74,12 +77,17 @@ public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetView
         }
     }
 
-    public PresetAdapter(Settings settings) {
-        this.settings = settings;
+    public PresetAdapter(AppState appState, AppActionPerformer actionPerformer) {
+        this.appState = appState;
+        this.actionPerformer = actionPerformer;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void setDevice(MIDIControllerDevice device) {
+    public void setDevice(Device device) {
         this.device = device;
         presets = new ArrayList<>(device.getPresets().values());
         notifyDataSetChanged();
@@ -92,7 +100,7 @@ public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetView
         LayoutInflater inflater = LayoutInflater.from(context);
         LayoutPresetItemBinding binding = LayoutPresetItemBinding.inflate(inflater, parent, false);
         View itemView = binding.getRoot();
-        Utilities.setEnabledForGroup(Utilities.isServiceEnabled(context), (ViewGroup)itemView);
+        ViewUtilities.setEnabledForGroup(MIDIMapperAccessibilityService.isServiceEnabled(context), (ViewGroup)itemView);
         return new PresetViewHolder(itemView, binding);
     }
 
@@ -102,7 +110,7 @@ public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetView
         holder.binding.setPreset(preset);
         holder.binding.executePendingBindings();
         holder.bindingAdapter.setPreset(preset);
-        holder.removeButton.setOnClickListener(view -> remove(position));
+        holder.removeButton.setOnClickListener(view -> onRemoveButtonClicked(preset));
 
         holder.selectPresetRadioButton.setChecked(preset.getName().equals(device.getCurrentPresetName()));
         holder.selectPresetRadioButton.setOnCheckedChangeListener((buttonView, isChecked) -> setSelected(preset, isChecked));
@@ -134,29 +142,37 @@ public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetView
         return presets.size();
     }
 
-    public void add(BindingsPreset preset) {
+    public BindingAdapter findBindingAdapter(BindingsPreset preset) {
+        int position = presets.indexOf(preset);
+        PresetViewHolder viewHolder = (PresetViewHolder) recyclerView.findViewHolderForAdapterPosition(position);
+        return viewHolder != null ? viewHolder.bindingAdapter : null;
+    }
+
+    public void addItem(BindingsPreset preset) {
         presets.add(preset);
         notifyItemInserted(getItemCount() - 1);
     }
 
+    public void updateItem(BindingsPreset preset) {
+        int position = presets.indexOf(preset);
+        notifyItemChanged(position);
+    }
+
+    public void removeItem(BindingsPreset preset) {
+        int position = presets.indexOf(preset);
+        presets.remove(position);
+        notifyItemRemoved(position);
+    }
+
     private void setSelected(BindingsPreset preset, boolean checked) {
         if (checked) {
-            int prevPosition = presets.indexOf(device.getCurrentPreset());
-            device.setCurrentPresetName(preset.getName());
-            notifyItemChanged(prevPosition);
-
-            if (device.getSerialNumber().equals(settings.getCurrentDeviceSerialNumber()))
-                updateConfigurationView();
+            BindingsPreset oldPreset = device.getCurrentPreset();
+            actionPerformer.changeCurrentPreset(device, oldPreset, preset);
         }
     }
 
-    private void remove(int position) {
-        BindingsPreset preset = presets.remove(position);
-        device.removePreset(preset.getName());
-        notifyItemRemoved(position);
-
-        if (device.getSerialNumber().equals(settings.getCurrentDeviceSerialNumber()) && device.getCurrentPreset() == null)
-            updateConfigurationView();
+    private void onRemoveButtonClicked(BindingsPreset preset) {
+        actionPerformer.removePreset(device, preset);
     }
 
     private void startNameChange(PresetViewHolder holder) {
@@ -168,23 +184,14 @@ public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetView
     }
 
     private void finishNameChange(BindingsPreset preset, PresetViewHolder holder) {
-        int position = presets.indexOf(preset);
         Context context = holder.itemView.getContext();
         String newName = holder.presetNameEditText.getText().toString();
         holder.changeNameButton.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_baseline_edit_24));
         holder.presetNameTextView.setVisibility(View.VISIBLE);
         holder.presetNameEditText.setVisibility(View.GONE);
-        device.changePresetName(preset, newName);
+
+        actionPerformer.renamePreset(device, preset, newName);
+
         holder.editMode = false;
-        notifyItemChanged(position);
-
-        if (device.getSerialNumber().equals(settings.getCurrentDeviceSerialNumber()) && device.getCurrentPresetName().equals(newName))
-            updateConfigurationView();
-    }
-
-    private void updateConfigurationView() {
-        MIDIMapperAccessibilityService service = MIDIMapperAccessibilityService.getInstance();
-        if (service != null)
-            service.updateConfigurationView();
     }
 }

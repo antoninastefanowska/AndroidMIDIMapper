@@ -1,4 +1,4 @@
-package com.softsquare.midimapper.gui;
+package com.softsquare.midimapper.service;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -28,13 +28,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sa90.materialarcmenu.ArcMenu;
 import com.sa90.materialarcmenu.StateChangeListener;
 
-import com.softsquare.midimapper.database.repositories.SettingsRepository;
-import com.softsquare.midimapper.databinding.LayoutMarkerViewBinding;
+import com.softsquare.midimapper.activity.MIDIMapperActivity;
+import com.softsquare.midimapper.communication.AppActionPerformer;
 import com.softsquare.midimapper.model.BindingsPreset;
+import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.model.KeyBinding;
-import com.softsquare.midimapper.model.MIDIControllerDevice;
+import com.softsquare.midimapper.model.AppState;
+import com.softsquare.midimapper.databinding.LayoutMarkerViewBinding;
 import com.softsquare.midimapper.R;
-import com.softsquare.midimapper.model.Settings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,9 +44,10 @@ import static android.content.Context.WINDOW_SERVICE;
 
 import androidx.core.content.ContextCompat;
 
-public class ConfigurationGUI {
+public class ServiceGUI {
+    private final AppActionPerformer actionPerformer;
+    private final AppState appState;
     private final Context context;
-    private final Settings settings;
 
     private WindowManager windowManager;
     private WindowManager.LayoutParams mainParams;
@@ -61,17 +63,16 @@ public class ConfigurationGUI {
 
     private Animation blinkAnimation;
 
-    private boolean open = false;
-    private boolean listenForKey = false;
-    private float initialX;
-    private float initialY;
-
     private View.OnTouchListener draggableMarkerListener;
 
-    public ConfigurationGUI(Context context) {
+    private boolean tapReady = true;
+
+    public ServiceGUI(Context context, AppState appState) {
+        actionPerformer = AppActionPerformer.getInstance(context);
+        this.appState = appState;
         this.context = context;
-        settings = SettingsRepository.getInstance().getSettings();
         createLayout();
+        updateViews();
     }
 
     private void createLayout() {
@@ -95,8 +96,6 @@ public class ConfigurationGUI {
         Display display = windowManager.getDefaultDisplay();
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
-        initialX = 0.0f;
-        initialY = 0.0f;
 
         configLayout = mainLayout.findViewById(R.id.config_layout);
         markersContainer = mainLayout.findViewById(R.id.markers_container);
@@ -136,8 +135,9 @@ public class ConfigurationGUI {
                     markerView.setY(event.getY() - markerView.getHeight() / 2.0f);
                     markerView.setVisibility(View.VISIBLE);
 
-                    KeyBinding binding = settings.getCurrentDevice().getCurrentPreset().getBinding(keyCode);
-                    binding.changePosition(event.getX(), event.getY());
+                    BindingsPreset preset = appState.getCurrentDevice().getCurrentPreset();
+                    KeyBinding binding = preset.getBinding(keyCode);
+                    actionPerformer.changeBindingPosition(preset, binding, event.getX(), event.getY());
                 }
             }
             return true;
@@ -166,8 +166,9 @@ public class ConfigurationGUI {
 
                     if (markerView != null) {
                         markersContainer.removeView(markerView);
-                        BindingsPreset preset = settings.getCurrentDevice().getCurrentPreset();
-                        preset.removeBinding(keyCode);
+                        BindingsPreset preset = appState.getCurrentDevice().getCurrentPreset();
+                        KeyBinding binding = preset.getBinding(keyCode);
+                        actionPerformer.removeBinding(preset, binding);
                     }
                     view.animate()
                             .scaleX(1.0f)
@@ -198,34 +199,32 @@ public class ConfigurationGUI {
         menu.setStateChangeListener(new StateChangeListener() {
             @Override
             public void onMenuOpened() {
-                showLayout();
+                actionPerformer.showServiceGUI();
             }
 
             @Override
             public void onMenuClosed() {
-                hideLayout();
+                actionPerformer.hideServiceGUI();
             }
         });
         menuOptionAdd = menu.findViewById(R.id.menu_button_add);
         menuOptionAdd.setOnClickListener(v -> {
-            if (!listenForKey)
-                startListeningForKey();
+            if (!appState.isListeningForKey() &&
+                 appState.getCurrentDevice() != null &&
+                 appState.getCurrentDevice().getCurrentPreset() != null)
+                actionPerformer.listenForKey();
             else
-                stopListeningForKey();
+                actionPerformer.stopListeningForKey();
         });
         FloatingActionButton menuOptionOpenSettings = menu.findViewById(R.id.menu_button_open_settings);
         menuOptionOpenSettings.setOnClickListener(v -> {
-            Intent intent = new Intent(context, SettingsActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent intent = new Intent(context, MIDIMapperActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             context.startActivity(intent);
         });
         FloatingActionButton menuOptionHideWidget = menu.findViewById(R.id.menu_button_hide_widget);
         menuOptionHideWidget.setOnClickListener(v -> {
-            settings.setHidden(true);
-            hideMenuWidget();
-            SettingsActivity activity = SettingsActivity.getInstance();
-            if (activity != null)
-                activity.updateViews();
+            actionPerformer.hideMenu();
             Toast.makeText(context, context.getString(R.string.layout_hidden_message), Toast.LENGTH_SHORT).show();
         });
     }
@@ -257,7 +256,7 @@ public class ConfigurationGUI {
         return new Pair<>(x, y);
     }
 
-    private void hideLayout() {
+    public void hideLayout() {
         configLayout.animate()
                 .alpha(0.0f)
                 .setDuration(250)
@@ -272,14 +271,13 @@ public class ConfigurationGUI {
                         configLayout.clearAnimation();
                         configLayout.setVisibility(View.GONE);
                         configLayout.setEnabled(false);
-
-                        open = false;
+                        tapReady = true;
                     }
                 });
     }
 
-    private void showLayout() {
-        open = true;
+    public void showLayout() {
+        tapReady = false;
         configLayout.animate()
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
@@ -317,7 +315,7 @@ public class ConfigurationGUI {
     }
 
     private void updateMarkers() {
-        MIDIControllerDevice device = settings.getCurrentDevice();
+        Device device = appState.getCurrentDevice();
         markersContainer.removeAllViews();
         markerViews.clear();
         if (device != null) {
@@ -331,7 +329,7 @@ public class ConfigurationGUI {
     public void updateLabels() {
         TextView deviceNameTextView = configLayout.findViewById(R.id.name_textview);
         TextView presetNameTextView = configLayout.findViewById(R.id.preset_textview);
-        MIDIControllerDevice device = settings.getCurrentDevice();
+        Device device = appState.getCurrentDevice();
 
         if (device != null) {
             deviceNameTextView.setText(context.getString(R.string.header, device.getName(), device.getManufacturer()));
@@ -404,37 +402,23 @@ public class ConfigurationGUI {
         }
     }
 
-    public float getInitialX() {
-        return initialX;
-    }
-
-    public float getInitialY() {
-        return initialY;
-    }
-
-    public boolean isListeningForKey() {
-        return listenForKey;
-    }
-
-    private void startListeningForKey() {
+    public void startListeningForKey() {
         TextView messageTextView = configLayout.findViewById(R.id.message_textview);
         messageTextView.setText(R.string.press_key);
         messageTextView.startAnimation(blinkAnimation);
         menuOptionAdd.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_baseline_close_24));
-        listenForKey = true;
     }
 
-    private void stopListeningForKey() {
+    public void stopListeningForKey() {
         TextView messageTextView = configLayout.findViewById(R.id.message_textview);
         menuOptionAdd.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_baseline_add_24));
         messageTextView.setText("");
         messageTextView.clearAnimation();
         blinkAnimation.cancel();
         blinkAnimation.reset();
-        listenForKey = false;
     }
 
-    public boolean isOpen() {
-        return open;
+    public boolean isTapReady() {
+        return tapReady;
     }
 }

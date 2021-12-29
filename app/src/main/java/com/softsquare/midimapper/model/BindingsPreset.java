@@ -3,14 +3,12 @@ package com.softsquare.midimapper.model;
 import com.softsquare.midimapper.database.DatabaseEntity;
 import com.softsquare.midimapper.database.entities.BindingsPresetRelation;
 import com.softsquare.midimapper.database.entities.KeyBindingEntity;
-import com.softsquare.midimapper.database.repositories.BindingsPresetRepository;
-import com.softsquare.midimapper.database.repositories.KeyBindingRepository;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class BindingsPreset extends DatabaseEntity {
-    private Map<Integer, KeyBinding> bindings = new HashMap<>();
+    private final Map<Integer, KeyBinding> bindings = new HashMap<>();
     private String name;
 
     public BindingsPreset(String name) {
@@ -25,17 +23,13 @@ public class BindingsPreset extends DatabaseEntity {
             bindings.put(keyBindingEntity.keyCode, new KeyBinding(keyBindingEntity));
     }
 
-    public KeyBinding createNewBinding(int keyCode, float x, float y) {
-        KeyBinding keyBinding = new KeyBinding(keyCode, x, y);
-        keyBinding.setParentId(getId());
-        bindings.put(keyCode, keyBinding);
-        KeyBindingRepository.getInstance().insert(keyBinding);
-        return keyBinding;
+    public void addBinding(KeyBinding binding) {
+        binding.setParentId(getId());
+        bindings.put(binding.getKeyCode(), binding);
     }
 
     public void removeBinding(int keyCode) {
-        KeyBinding keyBinding = bindings.remove(keyCode);
-        KeyBindingRepository.getInstance().delete(keyBinding);
+        bindings.remove(keyCode);
     }
 
     public KeyBinding getBinding(int keyCode) {
@@ -48,7 +42,6 @@ public class BindingsPreset extends DatabaseEntity {
 
     public void setName(String name) {
         this.name = name;
-        BindingsPresetRepository.getInstance().update(this);
     }
 
     public String getName() {

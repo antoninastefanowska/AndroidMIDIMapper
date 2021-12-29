@@ -17,7 +17,7 @@ import com.softsquare.midimapper.model.BindingsPreset;
                 @Index(value = {"device_id"})},
         foreignKeys = {@ForeignKey(
                 onDelete = CASCADE,
-                entity = MIDIControllerDeviceEntity.class,
+                entity = DeviceEntity.class,
                 parentColumns = "id",
                 childColumns = "device_id"
         )})

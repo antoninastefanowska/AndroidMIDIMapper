@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
         <service
-            android:name=".MIDIMapperAccessibilityService"
+            android:name=".service.MIDIMapperAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -21,7 +21,7 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/midi_mapper_accessibility_service" />
         </service>
-        <activity android:name=".gui.SettingsActivity">
+        <activity android:name=".activity.MIDIMapperActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

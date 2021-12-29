@@ -2,7 +2,7 @@ package com.softsquare.midimapper.database.repositories;
 
 import android.content.Context;
 
-import com.softsquare.midimapper.database.SettingsDatabase;
+import com.softsquare.midimapper.database.AppDatabase;
 import com.softsquare.midimapper.database.daos.BindingsPresetDao;
 import com.softsquare.midimapper.database.entities.BindingsPresetEntity;
 import com.softsquare.midimapper.model.BindingsPreset;
@@ -14,16 +14,13 @@ public class BindingsPresetRepository {
     private final BindingsPresetDao dao;
 
     private BindingsPresetRepository(Context context) {
-        SettingsDatabase db = SettingsDatabase.getDatabase(context);
+        AppDatabase db = AppDatabase.getDatabase(context);
         dao = db.bindingsPresetDao();
     }
 
-    public static void createInstance(Context context) {
+    public static BindingsPresetRepository getInstance(Context context) {
         if (instance == null)
             instance = new BindingsPresetRepository(context);
-    }
-
-    public static BindingsPresetRepository getInstance() {
         return instance;
     }
 

@@ -2,7 +2,7 @@ package com.softsquare.midimapper.database.repositories;
 
 import android.content.Context;
 
-import com.softsquare.midimapper.database.SettingsDatabase;
+import com.softsquare.midimapper.database.AppDatabase;
 import com.softsquare.midimapper.database.daos.KeyBindingDao;
 import com.softsquare.midimapper.database.entities.KeyBindingEntity;
 import com.softsquare.midimapper.model.KeyBinding;
@@ -14,16 +14,13 @@ public class KeyBindingRepository {
     private final KeyBindingDao dao;
 
     private KeyBindingRepository(Context context) {
-        SettingsDatabase db = SettingsDatabase.getDatabase(context);
+        AppDatabase db = AppDatabase.getDatabase(context);
         dao = db.keyBindingDao();
     }
 
-    public static void createInstance(Context context) {
+    public static KeyBindingRepository getInstance(Context context) {
         if (instance == null)
             instance = new KeyBindingRepository(context);
-    }
-
-    public static KeyBindingRepository getInstance() {
         return instance;
     }
 

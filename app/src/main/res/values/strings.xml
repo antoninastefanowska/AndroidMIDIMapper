@@ -7,7 +7,7 @@
     <string name="device_not_detected">No MIDI controller device detected</string>
     <string name="device_connection_failure">Failed to connect device</string>
     <string name="feature_not_supported">Your device does not support MIDI controllers</string>
-    <string name="layout_hidden_message">You can restore menu widget in the service\'s settings app.</string>
+    <string name="layout_hidden_message">You can restore menu widget in the service\'s appState app.</string>
     <string name="error">Error</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>

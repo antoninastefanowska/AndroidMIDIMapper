@@ -5,7 +5,7 @@
     <data>
         <variable
             name="device"
-            type="com.softsquare.midimapper.model.MIDIControllerDevice" />
+            type="com.softsquare.midimapper.model.Device" />
     </data>
 
     <LinearLayout

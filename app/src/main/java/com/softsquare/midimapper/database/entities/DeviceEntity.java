@@ -8,7 +8,7 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-import com.softsquare.midimapper.model.MIDIControllerDevice;
+import com.softsquare.midimapper.model.Device;
 
 @Entity(
         tableName = "midi_controller_device",
@@ -17,11 +17,11 @@ import com.softsquare.midimapper.model.MIDIControllerDevice;
                 @Index(value = {"settings_id"})},
         foreignKeys = {@ForeignKey(
                 onDelete = CASCADE,
-                entity = SettingsEntity.class,
+                entity = AppStateEntity.class,
                 parentColumns = "id",
                 childColumns = "settings_id"
         )})
-public class MIDIControllerDeviceEntity {
+public class DeviceEntity {
     @PrimaryKey(autoGenerate = true)
     public Long id;
 
@@ -40,9 +40,9 @@ public class MIDIControllerDeviceEntity {
     @ColumnInfo(name = "settings_id")
     public long settingsId;
 
-    public MIDIControllerDeviceEntity() { }
+    public DeviceEntity() { }
 
-    public MIDIControllerDeviceEntity(MIDIControllerDevice device) {
+    public DeviceEntity(Device device) {
         id = device.getId();
         settingsId = device.getParentId();
         name = device.getName();

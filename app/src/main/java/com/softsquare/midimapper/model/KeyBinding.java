@@ -2,7 +2,6 @@ package com.softsquare.midimapper.model;
 
 import com.softsquare.midimapper.database.DatabaseEntity;
 import com.softsquare.midimapper.database.entities.KeyBindingEntity;
-import com.softsquare.midimapper.database.repositories.KeyBindingRepository;
 
 public class KeyBinding extends DatabaseEntity {
     private final int keyCode;
@@ -59,6 +58,5 @@ public class KeyBinding extends DatabaseEntity {
     public void changePosition(float x, float y) {
         this.x = x;
         this.y = y;
-        KeyBindingRepository.getInstance().update(this);
     }
 }

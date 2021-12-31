@@ -8,6 +8,8 @@ import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
@@ -62,10 +64,9 @@ public class ServiceGUI {
     private final Map<Integer, View> markerViews = new HashMap<>();
 
     private Animation blinkAnimation;
-
     private View.OnTouchListener draggableMarkerListener;
-
     private boolean tapReady = true;
+    private Pair<Float, Float> oldPosition;
 
     public ServiceGUI(Context context, AppState appState) {
         actionPerformer = AppActionPerformer.getInstance(context);
@@ -99,6 +100,22 @@ public class ServiceGUI {
 
         configLayout = mainLayout.findViewById(R.id.config_layout);
         markersContainer = mainLayout.findViewById(R.id.markers_container);
+        oldPosition = PositionConverters.getLayoutPosition(markersContainer);
+
+        markersContainer.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            Pair<Float, Float> position = PositionConverters.getLayoutPosition(markersContainer);
+            if (
+                    left != oldLeft ||
+                    right != oldRight ||
+                    top != oldTop ||
+                    bottom != oldBottom ||
+                    !position.first.equals(oldPosition.first) ||
+                    !position.second.equals(oldPosition.second)) {
+                oldPosition = position;
+                new Handler(Looper.getMainLooper()).post(this::updateViews);
+            }
+        });
+
         FloatingActionButton trashBin = mainLayout.findViewById(R.id.trash_bin);
 
         blinkAnimation = AnimationUtils.loadAnimation(context, R.anim.blink_animation);
@@ -131,13 +148,27 @@ public class ServiceGUI {
                 View markerView = markerViews.get(keyCode);
 
                 if (markerView != null) {
-                    markerView.setX(event.getX() - markerView.getWidth() / 2.0f);
-                    markerView.setY(event.getY() - markerView.getHeight() / 2.0f);
+                    float markerX = event.getX() - markerView.getWidth() / 2.0f;
+                    float markerY = event.getY() - markerView.getHeight() / 2.0f;
+
+                    markerView.setX(markerX);
+                    markerView.setY(markerY);
                     markerView.setVisibility(View.VISIBLE);
 
                     BindingsPreset preset = appState.getCurrentDevice().getCurrentPreset();
                     KeyBinding binding = preset.getBinding(keyCode);
-                    actionPerformer.changeBindingPosition(preset, binding, event.getX(), event.getY());
+                    Pair<Float, Float> bindingPosition = PositionConverters.markerToBindingPosition(
+                            getMarkerSize(),
+                            markersContainer,
+                            windowManager.getDefaultDisplay(),
+                            markerX,
+                            markerY);
+
+                    actionPerformer.changeBindingPosition(
+                            preset,
+                            binding,
+                            bindingPosition.first,
+                            bindingPosition.second);
                 }
             }
             return true;
@@ -248,14 +279,6 @@ public class ServiceGUI {
         updateLabels();
     }
 
-    public Pair<Float, Float> getLayoutPosition() {
-        int[] position = new int[2];
-        markersContainer.getLocationOnScreen(position);
-        float x = position[0];
-        float y = position[1];
-        return new Pair<>(x, y);
-    }
-
     public void hideLayout() {
         configLayout.animate()
                 .alpha(0.0f)
@@ -296,24 +319,39 @@ public class ServiceGUI {
                 .setDuration(250);
     }
 
+    public Pair<Float, Float> getTapPosition(KeyBinding binding) {
+        return PositionConverters.bindingToScreenPosition(
+                windowManager.getDefaultDisplay(),
+                binding.getX(),
+                binding.getY());
+    }
+
     public void createNewMarker(KeyBinding binding) {
         if (!markerViews.containsKey(binding.getKeyCode())) {
             LayoutMarkerViewBinding dataBinding = LayoutMarkerViewBinding.inflate(inflater, markersContainer, false);
             View markerView = dataBinding.getRoot();
             dataBinding.setBinding(binding);
 
+            markersContainer.addView(markerView);
+
             markerView.setTag(String.valueOf(binding.getKeyCode()));
             markerView.setOnTouchListener(draggableMarkerListener);
 
-            markerView.setX(binding.getX() - markerView.getWidth() / 2.0f);
-            markerView.setY(binding.getY() - markerView.getHeight() / 2.0f);
+            Pair<Float, Float> markerPosition = PositionConverters.bindingToMarkerPosition(
+                    getMarkerSize(),
+                    markersContainer,
+                    windowManager.getDefaultDisplay(),
+                    binding.getX(),
+                    binding.getY());
 
-            markersContainer.addView(markerView);
+            markerView.setX(markerPosition.first);
+            markerView.setY(markerPosition.second);
             markerViews.put(binding.getKeyCode(), markerView);
         }
         stopListeningForKey();
     }
 
+    // TODO: Avoid recreating all markers - move existing markers, create new markers, remove deleted markers.
     private void updateMarkers() {
         Device device = appState.getCurrentDevice();
         markersContainer.removeAllViews();
@@ -324,6 +362,10 @@ public class ServiceGUI {
                 for (Map.Entry<Integer, KeyBinding> entry : preset.getBindings().entrySet())
                     createNewMarker(entry.getValue());
         }
+    }
+
+    private int getMarkerSize() {
+        return context.getResources().getDimensionPixelSize(R.dimen.marker_icon_size);
     }
 
     public void updateLabels() {

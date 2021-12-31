@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Debug;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
@@ -29,6 +29,7 @@ public class MIDIMapperActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Debug.waitForDebugger();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_midi_mapper);
 
@@ -43,6 +44,18 @@ public class MIDIMapperActivity extends AppCompatActivity {
         actionPerformer.startActivity(this);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        actionPerformer.stopActivity(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        actionPerformer.resumeActivity(this);
+    }
+
     public void initializeAdapters(AppState appState, AppActionPerformer actionPerformer) {
         RecyclerView devicesRecyclerView = findViewById(R.id.devices_recycler_view);
         devicesRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -54,12 +67,6 @@ public class MIDIMapperActivity extends AppCompatActivity {
         return deviceAdapter;
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        actionPerformer.stopActivity(this);
-    }
-
     public void expandPanel(View view) {
         if (devicesExpandablePanel.getVisibility() == View.GONE) {
             devicesExpandablePanel.setVisibility(View.VISIBLE);
@@ -68,12 +75,6 @@ public class MIDIMapperActivity extends AppCompatActivity {
             devicesExpandablePanel.setVisibility(View.GONE);
             devicesExpandButton.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_baseline_arrow_drop_down_24));
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        actionPerformer.resumeActivity(this);
     }
 
     public void openAccessibilitySettings(View view) {
@@ -98,15 +99,6 @@ public class MIDIMapperActivity extends AppCompatActivity {
 
     public void updateViews(AppState appState) {
         menuVisibilitySwitch.setChecked(!appState.isMenuHidden());
-        setEnabledForGroup(MIDIMapperAccessibilityService.isServiceEnabled(this), settingViewsLayout);
-    }
-
-    private static void setEnabledForGroup(boolean enabled, ViewGroup viewGroup) {
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            View child = viewGroup.getChildAt(i);
-            child.setEnabled(enabled);
-            if (child instanceof ViewGroup)
-                setEnabledForGroup(enabled, (ViewGroup)child);
-        }
+        ViewUtilities.setEnabledForGroup(MIDIMapperAccessibilityService.isServiceEnabled(this), settingViewsLayout);
     }
 }

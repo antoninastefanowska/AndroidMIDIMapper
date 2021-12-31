@@ -115,17 +115,14 @@ public class ServiceActionPerformer implements IActionPerformer {
             serviceGUI.updateViews();
     }
 
-    // TODO: Przemyśleć
     @Override
     public void pressKey(Device device, int keyCode) {
         if (appState != null) {
             KeyBinding keyBinding = device.getCurrentPreset().getBinding(keyCode);
 
             if (service != null && keyBinding != null && (appState.isMenuHidden() || serviceGUI.isTapReady())) {
-                Pair<Float, Float> layoutPosition = serviceGUI.getLayoutPosition();
-                float x = keyBinding.getX() + layoutPosition.first;
-                float y = keyBinding.getY() + layoutPosition.second;
-                service.dispatchTapAt(x, y);
+                Pair<Float, Float> tapPosition = serviceGUI.getTapPosition(keyBinding);
+                service.dispatchTapAt(tapPosition.first, tapPosition.second);
             } else if (actionPerformer != null && serviceGUI != null && appState.isListeningForKey() && keyBinding == null)
                 actionPerformer.createBinding(device.getCurrentPreset(), keyCode);
 

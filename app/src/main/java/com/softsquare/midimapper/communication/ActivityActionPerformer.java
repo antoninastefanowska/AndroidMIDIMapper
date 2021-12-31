@@ -14,7 +14,28 @@ import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.model.KeyBinding;
 import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 
-public class ActivityActionPerformer implements IActionPerformer {
+public class ActivityActionPerformer implements
+        Actions.ILoadSettingsAction,
+        Actions.IAddBindingAction,
+        Actions.IRemoveBindingAction,
+        Actions.IChangeBindingPositionAction,
+        Actions.IAddPresetAction,
+        Actions.IRemovePresetAction,
+        Actions.IRenamePresetAction,
+        Actions.IChangeCurrentPresetAction,
+        Actions.IAddDeviceAction,
+        Actions.IRemoveDeviceAction,
+        Actions.IConnectDeviceAction,
+        Actions.IDisconnectDeviceAction,
+        Actions.IChangeCurrentDeviceAction,
+        Actions.IHideMenuAction,
+        Actions.IShowMenuAction,
+        Actions.IStartServiceAction,
+        Actions.IStopServiceAction,
+        Actions.IStartActivityAction,
+        Actions.IStopActivityAction,
+        Actions.IResumeActivityAction {
+
     private MIDIMapperActivity activity;
     private AppState appState;
     private DeviceAdapter deviceAdapter;
@@ -176,12 +197,6 @@ public class ActivityActionPerformer implements IActionPerformer {
     }
 
     @Override
-    public void pressKey(Device device, int keyCode) { }
-
-    @Override
-    public void showError(String error) { }
-
-    @Override
     public void hideMenu() {
         if (activity != null)
             new Handler(Looper.getMainLooper()).post(() -> activity.onMenuHidden());
@@ -192,18 +207,6 @@ public class ActivityActionPerformer implements IActionPerformer {
         if (activity != null)
             new Handler(Looper.getMainLooper()).post(() -> activity.onMenuShown());
     }
-
-    @Override
-    public void listenForKey() { }
-
-    @Override
-    public void stopListeningForKey() { }
-
-    @Override
-    public void hideServiceGUI() { }
-
-    @Override
-    public void showServiceGUI() { }
 
     @Override
     public void startService(MIDIMapperAccessibilityService service) {

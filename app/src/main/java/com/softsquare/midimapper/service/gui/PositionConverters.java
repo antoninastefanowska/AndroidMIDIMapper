@@ -1,4 +1,4 @@
-package com.softsquare.midimapper.service;
+package com.softsquare.midimapper.service.gui;
 
 import android.util.DisplayMetrics;
 import android.util.Pair;

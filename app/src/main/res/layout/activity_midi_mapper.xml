@@ -77,7 +77,8 @@
                         android:id="@+id/menu_visibility_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end|center" />
+                        android:layout_gravity="end|center"
+                        android:checked="true" />
 
                 </FrameLayout>
 

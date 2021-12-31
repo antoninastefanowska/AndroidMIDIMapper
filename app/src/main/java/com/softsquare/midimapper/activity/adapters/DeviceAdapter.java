@@ -31,11 +31,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
     private final AppActionPerformer actionPerformer;
 
     public static class DeviceViewHolder extends RecyclerView.ViewHolder {
-        public LayoutDeviceItemBinding binding;
-        public PresetAdapter presetAdapter;
-        public ImageButton removeButton;
-        public ImageButton createPresetButton;
-        public RadioButton selectDeviceRadioButton;
+        public final LayoutDeviceItemBinding binding;
+        public final PresetAdapter presetAdapter;
+        public final ImageButton removeButton;
+        public final ImageButton createPresetButton;
+        public final RadioButton selectDeviceRadioButton;
 
         public DeviceViewHolder(@NonNull View itemView, LayoutDeviceItemBinding binding, PresetAdapter presetAdapter) {
             super(itemView);
@@ -87,7 +87,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         LayoutDeviceItemBinding binding = LayoutDeviceItemBinding.inflate(inflater, parent, false);
         View itemView = binding.getRoot();
         ViewUtilities.setEnabledForGroup(MIDIMapperAccessibilityService.isServiceEnabled(context), (ViewGroup)itemView);
-        PresetAdapter presetAdapter = new PresetAdapter(appState, actionPerformer);
+        PresetAdapter presetAdapter = new PresetAdapter(actionPerformer);
         return new DeviceViewHolder(itemView, binding, presetAdapter);
     }
 

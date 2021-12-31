@@ -2,7 +2,6 @@ package com.softsquare.midimapper.communication;
 
 import android.content.Context;
 
-import com.softsquare.midimapper.activity.MIDIMapperActivity;
 import com.softsquare.midimapper.database.repositories.BindingsPresetRepository;
 import com.softsquare.midimapper.database.repositories.KeyBindingRepository;
 import com.softsquare.midimapper.database.repositories.DeviceRepository;
@@ -11,9 +10,20 @@ import com.softsquare.midimapper.model.AppState;
 import com.softsquare.midimapper.model.BindingsPreset;
 import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.model.KeyBinding;
-import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 
-public class DatabaseActionPerformer implements IActionPerformer {
+public class DatabaseActionPerformer implements
+        Actions.ILoadSettingsAction,
+        Actions.IAddBindingAction,
+        Actions.IRemoveBindingAction,
+        Actions.IChangeBindingPositionAction,
+        Actions.IAddPresetAction,
+        Actions.IRemovePresetAction,
+        Actions.IRenamePresetAction,
+        Actions.IChangeCurrentPresetAction,
+        Actions.IAddDeviceAction,
+        Actions.IRemoveDeviceAction,
+        Actions.IChangeCurrentDeviceAction {
+
     private static DatabaseActionPerformer instance;
 
     private AppState appState;
@@ -87,52 +97,7 @@ public class DatabaseActionPerformer implements IActionPerformer {
     }
 
     @Override
-    public void connectDevice(Device device) { }
-
-    @Override
-    public void disconnectDevice(Device device) { }
-
-    @Override
     public void changeCurrentDevice(Device oldDevice, Device newDevice) {
         appStateRepository.update(appState);
     }
-
-    @Override
-    public void pressKey(Device device, int keyCode) { }
-
-    @Override
-    public void showError(String error) { }
-
-    @Override
-    public void hideMenu() { }
-
-    @Override
-    public void showMenu() { }
-
-    @Override
-    public void listenForKey() { }
-
-    @Override
-    public void stopListeningForKey() { }
-
-    @Override
-    public void hideServiceGUI() { }
-
-    @Override
-    public void showServiceGUI() { }
-
-    @Override
-    public void startService(MIDIMapperAccessibilityService service) { }
-
-    @Override
-    public void stopService(MIDIMapperAccessibilityService service) { }
-
-    @Override
-    public void startActivity(MIDIMapperActivity activity) { }
-
-    @Override
-    public void stopActivity(MIDIMapperActivity activity) { }
-
-    @Override
-    public void resumeActivity(MIDIMapperActivity activity) { }
 }

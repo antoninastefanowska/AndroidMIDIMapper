@@ -2,14 +2,32 @@ package com.softsquare.midimapper.communication;
 
 import android.content.Context;
 
-import com.softsquare.midimapper.activity.MIDIMapperActivity;
 import com.softsquare.midimapper.model.BindingsPreset;
 import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.model.KeyBinding;
 import com.softsquare.midimapper.model.AppState;
-import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 
-public class ModelActionPerformer implements IActionPerformer {
+public class ModelActionPerformer implements
+        Actions.ILoadSettingsAction,
+        Actions.IAddBindingAction,
+        Actions.IRemoveBindingAction,
+        Actions.IChangeBindingPositionAction,
+        Actions.IAddPresetAction,
+        Actions.IRemovePresetAction,
+        Actions.IRenamePresetAction,
+        Actions.IChangeCurrentPresetAction,
+        Actions.IAddDeviceAction,
+        Actions.IRemoveDeviceAction,
+        Actions.IConnectDeviceAction,
+        Actions.IDisconnectDeviceAction,
+        Actions.IChangeCurrentDeviceAction,
+        Actions.IHideMenuAction,
+        Actions.IShowMenuAction,
+        Actions.IListenForKeyAction,
+        Actions.IStopListeningForKeyAction,
+        Actions.IHideServiceGUIAction,
+        Actions.IShowServiceGUIAction {
+
     private static ModelActionPerformer instance;
 
     private AppState appState;
@@ -95,12 +113,6 @@ public class ModelActionPerformer implements IActionPerformer {
     }
 
     @Override
-    public void pressKey(Device device, int keyCode) { }
-
-    @Override
-    public void showError(String error) { }
-
-    @Override
     public void hideMenu() {
         appState.setMenuHidden(true);
     }
@@ -129,19 +141,4 @@ public class ModelActionPerformer implements IActionPerformer {
     public void showServiceGUI() {
         appState.setServiceGUIOpened(true);
     }
-
-    @Override
-    public void startService(MIDIMapperAccessibilityService service) { }
-
-    @Override
-    public void stopService(MIDIMapperAccessibilityService service) { }
-
-    @Override
-    public void startActivity(MIDIMapperActivity activity) { }
-
-    @Override
-    public void stopActivity(MIDIMapperActivity activity) { }
-
-    @Override
-    public void resumeActivity(MIDIMapperActivity activity) { }
 }

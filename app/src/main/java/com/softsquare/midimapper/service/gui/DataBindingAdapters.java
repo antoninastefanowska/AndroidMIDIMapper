@@ -1,4 +1,4 @@
-package com.softsquare.midimapper.activity.adapters;
+package com.softsquare.midimapper.service.gui;
 
 import android.widget.ImageView;
 

@@ -5,16 +5,32 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Pair;
 
-import com.softsquare.midimapper.activity.MIDIMapperActivity;
 import com.softsquare.midimapper.model.BindingsPreset;
 import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.model.KeyBinding;
 import com.softsquare.midimapper.model.AppState;
 import com.softsquare.midimapper.service.MIDIDeviceConnector;
 import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
-import com.softsquare.midimapper.service.ServiceGUI;
+import com.softsquare.midimapper.service.gui.ServiceGUI;
 
-public class ServiceActionPerformer implements IActionPerformer {
+public class ServiceActionPerformer implements
+        Actions.ILoadSettingsAction,
+        Actions.IAddBindingAction,
+        Actions.IRemoveBindingAction,
+        Actions.IRenamePresetAction,
+        Actions.IChangeCurrentPresetAction,
+        Actions.IChangeCurrentDeviceAction,
+        Actions.IPressKeyAction,
+        Actions.IShowErrorAction,
+        Actions.IHideMenuAction,
+        Actions.IShowMenuAction,
+        Actions.IListenForKeyAction,
+        Actions.IStopListeningForKeyAction,
+        Actions.IHideServiceGUIAction,
+        Actions.IShowServiceGUIAction,
+        Actions.IStartServiceAction,
+        Actions.IStopServiceAction {
+
     private static ServiceActionPerformer instance;
 
     private MIDIMapperAccessibilityService service;
@@ -68,15 +84,6 @@ public class ServiceActionPerformer implements IActionPerformer {
     }
 
     @Override
-    public void changeBindingPosition(BindingsPreset preset, KeyBinding binding, float x, float y) { }
-
-    @Override
-    public void addPreset(Device device, BindingsPreset preset) { }
-
-    @Override
-    public void removePreset(Device device, BindingsPreset preset) { }
-
-    @Override
     public void renamePreset(Device device, BindingsPreset preset, String newName) {
         if (appState != null) {
             Device currentDevice = appState.getCurrentDevice();
@@ -96,18 +103,6 @@ public class ServiceActionPerformer implements IActionPerformer {
                 serviceGUI.updateViews();
         }
     }
-
-    @Override
-    public void addDevice(Device device) { }
-
-    @Override
-    public void removeDevice(Device device) { }
-
-    @Override
-    public void connectDevice(Device device) { }
-
-    @Override
-    public void disconnectDevice(Device device) { }
 
     @Override
     public void changeCurrentDevice(Device oldDevice, Device newDevice) {
@@ -183,13 +178,4 @@ public class ServiceActionPerformer implements IActionPerformer {
         this.service = null;
         this.serviceGUI = null;
     }
-
-    @Override
-    public void startActivity(MIDIMapperActivity activity) { }
-
-    @Override
-    public void stopActivity(MIDIMapperActivity activity) { }
-
-    @Override
-    public void resumeActivity(MIDIMapperActivity activity) { }
 }

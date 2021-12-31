@@ -20,7 +20,7 @@ public class BindingAdapter extends RecyclerView.Adapter<BindingAdapter.BindingV
     private List<KeyBinding> bindings = new ArrayList<>();
 
     public static class BindingViewHolder extends RecyclerView.ViewHolder {
-        LayoutBindingItemBinding binding;
+        final LayoutBindingItemBinding binding;
 
         public BindingViewHolder(@NonNull View itemView, LayoutBindingItemBinding binding) {
             super(itemView);

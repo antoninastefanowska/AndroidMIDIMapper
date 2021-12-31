@@ -14,9 +14,36 @@ import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AppActionPerformer implements IActionPerformer {
+public class AppActionPerformer implements
+        Actions.ILoadSettingsAction,
+        Actions.IAddBindingAction,
+        Actions.IRemoveBindingAction,
+        Actions.IChangeBindingPositionAction,
+        Actions.IAddPresetAction,
+        Actions.IRemovePresetAction,
+        Actions.IRenamePresetAction,
+        Actions.IChangeCurrentPresetAction,
+        Actions.IAddDeviceAction,
+        Actions.IRemoveDeviceAction,
+        Actions.IConnectDeviceAction,
+        Actions.IDisconnectDeviceAction,
+        Actions.IChangeCurrentDeviceAction,
+        Actions.IPressKeyAction,
+        Actions.IShowErrorAction,
+        Actions.IHideMenuAction,
+        Actions.IShowMenuAction,
+        Actions.IListenForKeyAction,
+        Actions.IStopListeningForKeyAction,
+        Actions.IHideServiceGUIAction,
+        Actions.IShowServiceGUIAction,
+        Actions.IStartServiceAction,
+        Actions.IStopServiceAction,
+        Actions.IStartActivityAction,
+        Actions.IStopActivityAction,
+        Actions.IResumeActivityAction
+{
     private static AppActionPerformer instance;
-    private final List<IActionPerformer> listeners = new ArrayList<>();
+    private final List<Actions.IAction> listeners = new ArrayList<>();
     private AppState appState;
 
     private AppActionPerformer(Context context) {
@@ -32,13 +59,12 @@ public class AppActionPerformer implements IActionPerformer {
         return instance;
     }
 
-    public KeyBinding createBinding(BindingsPreset preset, int keyCode) {
+    public void createBinding(BindingsPreset preset, int keyCode) {
         KeyBinding binding = new KeyBinding(keyCode, 0.0f, 0.0f);
         addBinding(preset, binding);
-        return binding;
     }
 
-    public BindingsPreset createPreset(Device device) {
+    public void createPreset(Device device) {
         String baseName = "preset", name;
         int suffix = 0;
         do {
@@ -48,7 +74,6 @@ public class AppActionPerformer implements IActionPerformer {
 
         BindingsPreset preset = new BindingsPreset(name);
         addPreset(device, preset);
-        return preset;
     }
 
     public Device createDevice(MidiDeviceInfo deviceInfo) {
@@ -61,34 +86,39 @@ public class AppActionPerformer implements IActionPerformer {
     @Override
     public void loadSettings(AppState appState, Context context) {
         this.appState = appState;
-        for (IActionPerformer listener : listeners)
-            listener.loadSettings(appState, context);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.ILoadSettingsAction)
+                ((Actions.ILoadSettingsAction) listener).loadSettings(appState, context);
 
         showMenu();
     }
 
     @Override
     public void addBinding(BindingsPreset preset, KeyBinding binding) {
-        for (IActionPerformer listener : listeners)
-            listener.addBinding(preset, binding);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IAddBindingAction)
+                ((Actions.IAddBindingAction) listener).addBinding(preset, binding);
     }
 
     @Override
     public void removeBinding(BindingsPreset preset, KeyBinding binding) {
-        for (IActionPerformer listener : listeners)
-            listener.removeBinding(preset, binding);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IRemoveBindingAction)
+                ((Actions.IRemoveBindingAction) listener).removeBinding(preset, binding);
     }
 
     @Override
     public void changeBindingPosition(BindingsPreset preset, KeyBinding binding, float x, float y) {
-        for (IActionPerformer listener : listeners)
-            listener.changeBindingPosition(preset, binding, x, y);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IChangeBindingPositionAction)
+                ((Actions.IChangeBindingPositionAction) listener).changeBindingPosition(preset, binding, x, y);
     }
 
     @Override
     public void addPreset(Device device, BindingsPreset preset) {
-        for (IActionPerformer listener : listeners)
-            listener.addPreset(device, preset);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IAddPresetAction)
+                ((Actions.IAddPresetAction) listener).addPreset(device, preset);
 
         if (device != null) {
             BindingsPreset currentPreset = device.getCurrentPreset();
@@ -99,8 +129,9 @@ public class AppActionPerformer implements IActionPerformer {
 
     @Override
     public void removePreset(Device device, BindingsPreset preset) {
-        for (IActionPerformer listener : listeners)
-            listener.removePreset(device, preset);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IRemovePresetAction)
+                ((Actions.IRemovePresetAction) listener).removePreset(device, preset);
 
         if (device != null) {
             BindingsPreset currentPreset = device.getCurrentPreset();
@@ -111,8 +142,9 @@ public class AppActionPerformer implements IActionPerformer {
 
     @Override
     public void renamePreset(Device device, BindingsPreset preset, String newName) {
-        for (IActionPerformer listener : listeners)
-            listener.renamePreset(device, preset, newName);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IRenamePresetAction)
+                ((Actions.IRenamePresetAction) listener).renamePreset(device, preset, newName);
 
         Device currentDevice = appState.getCurrentDevice();
         if (currentDevice != null) {
@@ -124,26 +156,30 @@ public class AppActionPerformer implements IActionPerformer {
 
     @Override
     public void changeCurrentPreset(Device device, BindingsPreset oldPreset, BindingsPreset newPreset) {
-        for (IActionPerformer listener : listeners)
-            listener.changeCurrentPreset(device, oldPreset, newPreset);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IChangeCurrentPresetAction)
+                ((Actions.IChangeCurrentPresetAction) listener).changeCurrentPreset(device, oldPreset, newPreset);
     }
 
     @Override
     public void addDevice(Device device) {
-        for (IActionPerformer listener : listeners)
-            listener.addDevice(device);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IAddDeviceAction)
+                ((Actions.IAddDeviceAction) listener).addDevice(device);
     }
 
     @Override
     public void removeDevice(Device device) {
-        for (IActionPerformer listener : listeners)
-            listener.removeDevice(device);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IRemoveDeviceAction)
+                ((Actions.IRemoveDeviceAction) listener).removeDevice(device);
     }
 
     @Override
     public void connectDevice(Device device) {
-        for (IActionPerformer listener : listeners)
-            listener.connectDevice(device);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IConnectDeviceAction)
+                ((Actions.IConnectDeviceAction) listener).connectDevice(device);
 
         if (appState.getCurrentDeviceSerialNumber() == null)
             changeCurrentDevice(null, device);
@@ -151,8 +187,9 @@ public class AppActionPerformer implements IActionPerformer {
 
     @Override
     public void disconnectDevice(Device device) {
-        for (IActionPerformer listener : listeners)
-            listener.disconnectDevice(device);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IDisconnectDeviceAction)
+                ((Actions.IDisconnectDeviceAction) listener).disconnectDevice(device);
 
         Device currentDevice = appState.getCurrentDevice();
         if (device == currentDevice)
@@ -161,91 +198,105 @@ public class AppActionPerformer implements IActionPerformer {
 
     @Override
     public void changeCurrentDevice(Device oldDevice, Device newDevice) {
-        for (IActionPerformer listener : listeners)
-            listener.changeCurrentDevice(oldDevice, newDevice);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IChangeCurrentDeviceAction)
+                ((Actions.IChangeCurrentDeviceAction) listener).changeCurrentDevice(oldDevice, newDevice);
     }
 
     @Override
     public void pressKey(Device device, int keyCode) {
-        for (IActionPerformer listener : listeners)
-            listener.pressKey(device, keyCode);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IPressKeyAction)
+                ((Actions.IPressKeyAction) listener).pressKey(device, keyCode);
     }
 
     @Override
     public void showError(String error) {
-        for (IActionPerformer listener : listeners)
-            listener.showError(error);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IShowErrorAction)
+                ((Actions.IShowErrorAction) listener).showError(error);
     }
 
     @Override
     public void hideMenu() {
         if (!appState.isMenuHidden())
-            for (IActionPerformer listener : listeners)
-                listener.hideMenu();
+            for (Actions.IAction listener : listeners)
+                if (listener instanceof Actions.IHideMenuAction)
+                    ((Actions.IHideMenuAction) listener).hideMenu();
     }
 
     @Override
     public void showMenu() {
         if (appState.isMenuHidden())
-            for (IActionPerformer listener : listeners)
-                listener.showMenu();
+            for (Actions.IAction listener : listeners)
+                if (listener instanceof Actions.IShowMenuAction)
+                    ((Actions.IShowMenuAction) listener).showMenu();
     }
 
     @Override
     public void listenForKey() {
-        for (IActionPerformer listener : listeners)
-            listener.listenForKey();
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IListenForKeyAction)
+                ((Actions.IListenForKeyAction) listener).listenForKey();
     }
 
     @Override
     public void stopListeningForKey() {
-        for (IActionPerformer listener : listeners)
-            listener.stopListeningForKey();
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IStopListeningForKeyAction)
+                ((Actions.IStopListeningForKeyAction) listener).stopListeningForKey();
     }
 
     @Override
     public void hideServiceGUI() {
-        for (IActionPerformer listener : listeners)
-            listener.hideServiceGUI();
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IHideServiceGUIAction)
+                ((Actions.IHideServiceGUIAction) listener).hideServiceGUI();
     }
 
     @Override
     public void showServiceGUI() {
-        for (IActionPerformer listener : listeners)
-            listener.showServiceGUI();
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IShowServiceGUIAction)
+                ((Actions.IShowServiceGUIAction) listener).showServiceGUI();
     }
 
     @Override
     public void startService(MIDIMapperAccessibilityService service) {
         AppStateRepository.getInstance(service).getSettingsAsync(settings -> loadSettings(settings, service));
 
-        for (IActionPerformer listener : listeners)
-            listener.startService(service);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IStartServiceAction)
+                ((Actions.IStartServiceAction) listener).startService(service);
     }
 
     @Override
     public void stopService(MIDIMapperAccessibilityService service) {
-        for (IActionPerformer listener : listeners)
-            listener.stopService(service);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IStopServiceAction)
+                ((Actions.IStopServiceAction) listener).stopService(service);
     }
 
     @Override
     public void startActivity(MIDIMapperActivity activity) {
         AppStateRepository.getInstance(activity).getSettingsAsync(settings -> loadSettings(settings, activity));
 
-        for (IActionPerformer listener : listeners)
-            listener.startActivity(activity);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IStartActivityAction)
+                ((Actions.IStartActivityAction) listener).startActivity(activity);
     }
 
     @Override
     public void stopActivity(MIDIMapperActivity activity) {
-        for (IActionPerformer listener : listeners)
-            listener.stopActivity(activity);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IStopActivityAction)
+                ((Actions.IStopActivityAction) listener).stopActivity(activity);
     }
 
     @Override
     public void resumeActivity(MIDIMapperActivity activity) {
-        for (IActionPerformer listener : listeners)
-            listener.resumeActivity(activity);
+        for (Actions.IAction listener : listeners)
+            if (listener instanceof Actions.IResumeActivityAction)
+                ((Actions.IResumeActivityAction) listener).resumeActivity(activity);
     }
 }

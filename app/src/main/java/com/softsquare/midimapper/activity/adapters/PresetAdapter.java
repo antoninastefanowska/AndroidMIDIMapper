@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softsquare.midimapper.communication.AppActionPerformer;
-import com.softsquare.midimapper.model.AppState;
 import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 import com.softsquare.midimapper.R;
@@ -31,20 +30,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetViewHolder> {
+    private final AppActionPerformer actionPerformer;
+
     private Device device;
     private List<BindingsPreset> presets = new ArrayList<>();
-    private AppState appState;
-    private AppActionPerformer actionPerformer;
     private RecyclerView recyclerView;
 
     public static class PresetViewHolder extends RecyclerView.ViewHolder {
-        public LayoutPresetItemBinding binding;
-        public BindingAdapter bindingAdapter;
-        public ImageButton removeButton;
-        public ImageButton changeNameButton;
-        public RadioButton selectPresetRadioButton;
-        public TextView presetNameTextView;
-        public EditText presetNameEditText;
+        public final LayoutPresetItemBinding binding;
+        public final BindingAdapter bindingAdapter;
+        public final ImageButton removeButton;
+        public final ImageButton changeNameButton;
+        public final RadioButton selectPresetRadioButton;
+        public final TextView presetNameTextView;
+        public final EditText presetNameEditText;
         public boolean editMode = false;
 
         public PresetViewHolder(@NonNull View itemView, LayoutPresetItemBinding binding) {
@@ -77,8 +76,7 @@ public class PresetAdapter extends RecyclerView.Adapter<PresetAdapter.PresetView
         }
     }
 
-    public PresetAdapter(AppState appState, AppActionPerformer actionPerformer) {
-        this.appState = appState;
+    public PresetAdapter(AppActionPerformer actionPerformer) {
         this.actionPerformer = actionPerformer;
     }
 

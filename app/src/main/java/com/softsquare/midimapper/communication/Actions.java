@@ -9,7 +9,9 @@ import com.softsquare.midimapper.model.Device;
 import com.softsquare.midimapper.model.KeyBinding;
 import com.softsquare.midimapper.service.MIDIMapperAccessibilityService;
 
-public abstract class Actions {
+public final class Actions {
+    private Actions() { }
+
     public interface IAction { }
 
     public interface ILoadSettingsAction extends IAction {

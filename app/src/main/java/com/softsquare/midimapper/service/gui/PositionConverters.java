@@ -6,7 +6,9 @@ import android.view.Display;
 import android.view.Surface;
 import android.widget.FrameLayout;
 
-public class PositionConverters {
+public final class PositionConverters {
+    private PositionConverters() { }
+
     private static Pair<Integer, Integer> getScreenSize(Display defaultDisplay) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         defaultDisplay.getRealMetrics(displayMetrics);
